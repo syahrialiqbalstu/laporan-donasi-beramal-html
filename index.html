@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CS Donasi - Kirim Laporan ke WhatsApp</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+      .emoji-btn:hover {
+        transform: scale(1.2);
+      }
+      .card-enter {
+        animation: slideIn 0.3s ease-out;
+      }
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .drop-zone.dragover {
+        border-color: #22c55e;
+        background-color: #f0fdf4;
+      }
+    </style>
+  </head>
+  <body class="bg-gradient-to-br from-green-50 to-emerald-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+      <!-- Header -->
+      <header class="text-center mb-8">
+        <div
+          class="inline-flex items-center gap-3 bg-white px-6 py-3 rounded-2xl shadow-lg"
+        >
+          <span class="text-4xl">🤗</span>
+          <div>
+            <h1 class="text-2xl font-bold text-gray-800">
+              CS Baik Membantu Program
+            </h1>
+            <p class="text-sm text-gray-500">
+              Kirim Laporan Donasi via WhatsApp
+            </p>
+          </div>
+        </div>
+      </header>
+
+      <div class="grid lg:grid-cols-2 gap-6">
+        <!-- Left Panel - Upload & Message -->
+        <div class="space-y-6">
+          <!-- Upload Section -->
+          <div class="bg-white rounded-2xl shadow-lg p-6">
+            <h2
+              class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2"
+            >
+              <span>📁</span> Upload Data Donatur
+            </h2>
+            <div
+              id="dropZone"
+              class="drop-zone border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer hover:border-green-500 transition-all"
+            >
+              <input
+                type="file"
+                id="fileInput"
+                accept=".csv,.xlsx,.xls"
+                class="hidden"
+              />
+              <div class="text-5xl mb-3">📊</div>
+              <p class="text-gray-600 font-medium">
+                Drag & drop file CSV/XLSX disini
+              </p>
+              <p class="text-gray-400 text-sm mt-1">
+                atau klik untuk memilih file
+              </p>
+              <p class="text-xs text-gray-400 mt-3">
+                Format: Kolom 1 (Nama), Kolom 2 (No. WA), Kolom 3 (Nominal)
+              </p>
+            </div>
+            <div
+              id="fileInfo"
+              class="hidden mt-4 p-3 bg-green-50 rounded-lg flex items-center justify-between"
+            >
+              <div class="flex items-center gap-2">
+                <span class="text-green-600">✅</span>
+                <span id="fileName" class="text-green-700 font-medium"></span>
+              </div>
+              <button
+                onclick="clearFile()"
+                class="text-red-500 hover:text-red-700 text-sm"
+              >
+                Hapus
+              </button>
+            </div>
+          </div>
+
+          <!-- Message Template Section -->
+          <div class="bg-white rounded-2xl shadow-lg p-6">
+            <h2
+              class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2"
+            >
+              <span>✉️</span> Template Pesan
+            </h2>
+
+            <!-- Emoji Picker -->
+            <div class="mb-4">
+              <p class="text-sm text-gray-500 mb-2">Emoji Cepat:</p>
+              <div class="flex flex-wrap gap-2">
+                <button
+                  onclick="insertEmoji('🙏')"
+                  class="emoji-btn text-2xl hover:bg-gray-100 p-1 rounded transition-transform"
+                >
+                  🙏
+                </button>
+                <button
+                  onclick="insertEmoji('💚')"
+                  class="emoji-btn text-2xl hover:bg-gray-100 p-1 rounded transition-transform"
+                >
+                  💚
+                </button>
+                <button
+                  onclick="insertEmoji('❤️')"
+                  class="emoji-btn text-2xl hover:bg-gray-100 p-1 rounded transition-transform"
+                >
+                  ❤️
+                </button>
+                <button
+                  onclick="insertEmoji('✨')"
+                  class="emoji-btn text-2xl hover:bg-gray-100 p-1 rounded transition-transform"
+                >
+                  ✨
+                </button>
+                <button
+                  onclick="insertEmoji('🤲')"
+                  class="emoji-btn text-2xl hover:bg-gray-100 p-1 rounded transition-transform"
+                >
+                  🤲
+                </button>
+                <button
+                  onclick="insertEmoji('📢')"
+                  class="emoji-btn text-2xl hover:bg-gray-100 p-1 rounded transition-transform"
+                >
+                  📢
+                </button>
+                <button
+                  onclick="insertEmoji('💰')"
+                  class="emoji-btn text-2xl hover:bg-gray-100 p-1 rounded transition-transform"
+                >
+                  💰
+                </button>
+                <button
+                  onclick="insertEmoji('🎁')"
+                  class="emoji-btn text-2xl hover:bg-gray-100 p-1 rounded transition-transform"
+                >
+                  🎁
+                </button>
+                <button
+                  onclick="insertEmoji('🌟')"
+                  class="emoji-btn text-2xl hover:bg-gray-100 p-1 rounded transition-transform"
+                >
+                  🌟
+                </button>
+                <button
+                  onclick="insertEmoji('📋')"
+                  class="emoji-btn text-2xl hover:bg-gray-100 p-1 rounded transition-transform"
+                >
+                  📋
+                </button>
+                <button
+                  onclick="insertEmoji('✅')"
+                  class="emoji-btn text-2xl hover:bg-gray-100 p-1 rounded transition-transform"
+                >
+                  ✅
+                </button>
+                <button
+                  onclick="insertEmoji('🏠')"
+                  class="emoji-btn text-2xl hover:bg-gray-100 p-1 rounded transition-transform"
+                >
+                  🏠
+                </button>
+                <button
+                  onclick="insertEmoji('👨‍👩‍👧‍👦')"
+                  class="emoji-btn text-2xl hover:bg-gray-100 p-1 rounded transition-transform"
+                >
+                  👨‍👩‍👧‍👦
+                </button>
+                <button
+                  onclick="insertEmoji('🕌')"
+                  class="emoji-btn text-2xl hover:bg-gray-100 p-1 rounded transition-transform"
+                >
+                  🕌
+                </button>
+                <button
+                  onclick="insertEmoji('☪️')"
+                  class="emoji-btn text-2xl hover:bg-gray-100 p-1 rounded transition-transform"
+                >
+                  ☪️
+                </button>
+              </div>
+            </div>
+
+            <!-- Message Input -->
+            <div class="space-y-3">
+              <div>
+                <label class="text-sm text-gray-600 block mb-1"
+                  >Pesan (gunakan {nama}, {nominal} untuk placeholder):</label
+                >
+                <textarea
+                  id="messageTemplate"
+                  rows="8"
+                  class="w-full border border-gray-300 rounded-xl p-4 focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none resize-none"
+                  placeholder="Contoh: Assalamu'alaikum {nama} 🙏
+
+Jazakumullahu khairan atas donasi Anda sebesar {nominal} 💚
+
+Alhamdulillah, donasi Anda telah kami salurkan kepada saudara-saudara kita yang membutuhkan ✨
+
+Semoga menjadi amal jariyah dan berkah selalu 🤲"
+                >
+Assalamu'alaikum {nama} 🙏
+
+Jazakumullahu khairan atas donasi Anda sebesar {nominal} 💚
+
+Alhamdulillah, donasi Anda telah kami salurkan kepada saudara-saudara kita yang membutuhkan ✨
+
+Semoga menjadi amal jariyah dan berkah selalu 🤲
+
+Barakallahu fiikum 🌟</textarea
+                >
+              </div>
+            </div>
+
+            <!-- Preview -->
+            <div class="mt-4 p-4 bg-gray-50 rounded-xl">
+              <p class="text-sm text-gray-500 mb-2">Preview Pesan:</p>
+              <div
+                id="messagePreview"
+                class="text-gray-700 whitespace-pre-wrap text-sm bg-white p-3 rounded-lg border"
+              ></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Panel - Donor Cards -->
+        <div class="bg-white rounded-2xl shadow-lg p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h2
+              class="text-lg font-semibold text-gray-800 flex items-center gap-2"
+            >
+              <span>👥</span> Daftar Donatur
+              <span
+                id="donorCount"
+                class="bg-green-100 text-green-700 text-sm px-2 py-1 rounded-full"
+                >0</span
+              >
+            </h2>
+            <div class="flex gap-2">
+              <button
+                onclick="sendAll()"
+                id="sendAllBtn"
+                class="hidden bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+              >
+                <span>📤</span> Kirim Semua
+              </button>
+            </div>
+          </div>
+
+          <!-- Range Filter for CS Task Division -->
+          <div
+            class="mb-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl"
+          >
+            <div class="flex items-center gap-2 mb-3">
+              <span>📋</span>
+              <p class="text-sm font-semibold text-gray-700">
+                Pembagian Tugas CS
+              </p>
+              <span
+                id="totalDataInfo"
+                class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full"
+                >Total: 0 data</span
+              >
+            </div>
+            <div class="flex flex-wrap items-center gap-3">
+              <div class="flex items-center gap-2">
+                <label class="text-sm text-gray-600">Dari:</label>
+                <input
+                  type="number"
+                  id="rangeFrom"
+                  min="1"
+                  value="1"
+                  class="w-20 border border-gray-300 rounded-lg px-3 py-2 text-center focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                />
+              </div>
+              <div class="flex items-center gap-2">
+                <label class="text-sm text-gray-600">Sampai:</label>
+                <input
+                  type="number"
+                  id="rangeTo"
+                  min="1"
+                  value="50"
+                  class="w-20 border border-gray-300 rounded-lg px-3 py-2 text-center focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                />
+              </div>
+              <button
+                onclick="applyRangeFilter()"
+                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+              >
+                <span>✂️</span> Terapkan
+              </button>
+              <button
+                onclick="resetRangeFilter()"
+                class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+              >
+                <span>🔄</span> Reset
+              </button>
+            </div>
+            <div class="mt-3 flex flex-wrap gap-2">
+              <p class="text-xs text-gray-500">Preset:</p>
+              <button
+                onclick="setPreset(1, 50)"
+                class="text-xs bg-white hover:bg-blue-100 border border-blue-300 text-blue-700 px-2 py-1 rounded-full transition-colors"
+              >
+                CS1: 1-50
+              </button>
+              <button
+                onclick="setPreset(51, 100)"
+                class="text-xs bg-white hover:bg-blue-100 border border-blue-300 text-blue-700 px-2 py-1 rounded-full transition-colors"
+              >
+                CS2: 51-100
+              </button>
+              <button
+                onclick="setPreset(101, 150)"
+                class="text-xs bg-white hover:bg-blue-100 border border-blue-300 text-blue-700 px-2 py-1 rounded-full transition-colors"
+              >
+                CS3: 101-150
+              </button>
+              <button
+                onclick="setPreset(151, 200)"
+                class="text-xs bg-white hover:bg-blue-100 border border-blue-300 text-blue-700 px-2 py-1 rounded-full transition-colors"
+              >
+                CS4: 151-200
+              </button>
+            </div>
+          </div>
+
+          <!-- Search -->
+          <div class="mb-4">
+            <input
+              type="text"
+              id="searchInput"
+              onkeyup="filterDonors()"
+              placeholder="🔍 Cari donatur..."
+              class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
+            />
+          </div>
+
+          <!-- Donor Cards Container -->
+          <div
+            id="donorCards"
+            class="space-y-3 max-h-[600px] overflow-y-auto pr-2"
+          >
+            <div class="text-center py-12 text-gray-400">
+              <div class="text-5xl mb-3">📭</div>
+              <p>Belum ada data donatur</p>
+              <p class="text-sm">Upload file CSV/XLSX untuk memulai</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <footer class="text-center mt-8 text-gray-500 text-sm">
+        <p>Made with 💚 for Beramalbersama</p>
+      </footer>
+    </div>
+
+    <!-- Toast Notification -->
+    <div
+      id="toast"
+      class="fixed bottom-4 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all duration-300"
+    >
+      <span id="toastMessage"></span>
+    </div>
+
+    <script>
+      let allDonors = []; // Store all donors
+      let donors = []; // Currently displayed donors (filtered)
+      let sentStatus = {};
+
+      // DOM Elements
+      const dropZone = document.getElementById("dropZone");
+      const fileInput = document.getElementById("fileInput");
+      const messageTemplate = document.getElementById("messageTemplate");
+      const messagePreview = document.getElementById("messagePreview");
+
+      // Initialize
+      document.addEventListener("DOMContentLoaded", () => {
+        updatePreview();
+      });
+
+      // File Upload Handlers
+      dropZone.addEventListener("click", () => fileInput.click());
+
+      dropZone.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        dropZone.classList.add("dragover");
+      });
+
+      dropZone.addEventListener("dragleave", () => {
+        dropZone.classList.remove("dragover");
+      });
+
+      dropZone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        dropZone.classList.remove("dragover");
+        const files = e.dataTransfer.files;
+        if (files.length) handleFile(files[0]);
+      });
+
+      fileInput.addEventListener("change", (e) => {
+        if (e.target.files.length) handleFile(e.target.files[0]);
+      });
+
+      // Handle File Upload
+      function handleFile(file) {
+        const validTypes = [
+          "text/csv",
+          "application/vnd.ms-excel",
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        ];
+        const extension = file.name.split(".").pop().toLowerCase();
+
+        if (!["csv", "xlsx", "xls"].includes(extension)) {
+          showToast("❌ Format file tidak valid. Gunakan CSV atau XLSX");
+          return;
+        }
+
+        const reader = new FileReader();
+
+        reader.onload = (e) => {
+          try {
+            let data;
+            if (extension === "csv") {
+              data = parseCSV(e.target.result);
+            } else {
+              const workbook = XLSX.read(e.target.result, { type: "binary" });
+              const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+              data = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+            }
+
+            processData(data);
+            document.getElementById("fileInfo").classList.remove("hidden");
+            document.getElementById("fileName").textContent = file.name;
+          } catch (error) {
+            showToast("❌ Gagal membaca file. Periksa format file Anda");
+            console.error(error);
+          }
+        };
+
+        if (extension === "csv") {
+          reader.readAsText(file);
+        } else {
+          reader.readAsBinaryString(file);
+        }
+      }
+
+      // Parse CSV
+      function parseCSV(text) {
+        const lines = text.split("\n");
+        return lines.map((line) => {
+          // Handle comma within quotes
+          const result = [];
+          let current = "";
+          let inQuotes = false;
+
+          for (let char of line) {
+            if (char === '"') {
+              inQuotes = !inQuotes;
+            } else if (char === "," && !inQuotes) {
+              result.push(current.trim());
+              current = "";
+            } else {
+              current += char;
+            }
+          }
+          result.push(current.trim());
+          return result;
+        });
+      }
+
+      // Process Data
+      function processData(data) {
+        allDonors = [];
+        donors = [];
+        sentStatus = {};
+
+        // Skip header if first row looks like header
+        const startIndex = isHeader(data[0]) ? 1 : 0;
+
+        // Temporary storage for detecting duplicates
+        const donorMap = new Map();
+        let originalCount = 0;
+        let duplicateCount = 0;
+
+        for (let i = startIndex; i < data.length; i++) {
+          const row = data[i];
+          if (row && row.length >= 3 && row[0] && row[1]) {
+            originalCount++;
+            const name = String(row[0]).trim();
+            const phone = formatPhone(String(row[1]).trim());
+            const amount =
+              parseFloat(String(row[2]).replace(/[^\d.-]/g, "")) || 0;
+
+            // Create unique key from name + phone (case insensitive for name)
+            const uniqueKey = `${name.toLowerCase()}_${phone}`;
+
+            if (donorMap.has(uniqueKey)) {
+              // Duplicate found - add to existing amount
+              const existing = donorMap.get(uniqueKey);
+              existing.rawAmount += amount;
+              existing.donationCount += 1;
+              duplicateCount++;
+            } else {
+              // New donor
+              donorMap.set(uniqueKey, {
+                name: name,
+                phone: phone,
+                rawAmount: amount,
+                donationCount: 1,
+              });
+            }
+          }
+        }
+
+        // Convert map to array with proper formatting
+        let rowNumber = 1;
+        donorMap.forEach((donor, key) => {
+          allDonors.push({
+            id: rowNumber,
+            rowNum: rowNumber,
+            name: donor.name,
+            phone: donor.phone,
+            amount: formatCurrency(donor.rawAmount),
+            rawAmount: donor.rawAmount,
+            donationCount: donor.donationCount,
+          });
+          sentStatus[rowNumber] = false;
+          rowNumber++;
+        });
+
+        // Initially show all donors
+        donors = [...allDonors];
+
+        // Update total data info with duplicate info
+        updateTotalDataInfo(originalCount, duplicateCount);
+
+        // Update range input max values
+        document.getElementById("rangeTo").value = Math.min(
+          50,
+          allDonors.length
+        );
+
+        renderDonorCards();
+
+        // Show toast with duplicate info
+        if (duplicateCount > 0) {
+          showToast(
+            `✅ ${allDonors.length} donatur dimuat. 🔄 ${duplicateCount} data duplikat digabungkan!`
+          );
+        } else {
+          showToast(`✅ Berhasil memuat ${allDonors.length} data donatur`);
+        }
+      }
+
+      // Update total data info
+      function updateTotalDataInfo(originalCount = 0, duplicateCount = 0) {
+        const infoEl = document.getElementById("totalDataInfo");
+        if (duplicateCount > 0) {
+          infoEl.innerHTML = `Total: ${allDonors.length} donatur <span class="bg-orange-100 text-orange-700 px-1 rounded">🔄 ${duplicateCount} duplikat digabung</span>`;
+        } else {
+          infoEl.textContent = `Total: ${allDonors.length} data`;
+        }
+      }
+
+      // Apply range filter
+      function applyRangeFilter() {
+        const from = parseInt(document.getElementById("rangeFrom").value) || 1;
+        const to =
+          parseInt(document.getElementById("rangeTo").value) ||
+          allDonors.length;
+
+        if (from > to) {
+          showToast('❌ Nilai "Dari" tidak boleh lebih besar dari "Sampai"');
+          return;
+        }
+
+        if (from < 1) {
+          showToast('❌ Nilai "Dari" minimal 1');
+          return;
+        }
+
+        if (to > allDonors.length) {
+          showToast(`❌ Nilai "Sampai" maksimal ${allDonors.length}`);
+          return;
+        }
+
+        // Filter donors based on range (1-indexed for user-friendly)
+        donors = allDonors.filter((d) => d.rowNum >= from && d.rowNum <= to);
+
+        renderDonorCards();
+        showToast(
+          `✅ Menampilkan data ke-${from} sampai ke-${to} (${donors.length} donatur)`
+        );
+      }
+
+      // Reset range filter
+      function resetRangeFilter() {
+        document.getElementById("rangeFrom").value = 1;
+        document.getElementById("rangeTo").value = allDonors.length || 50;
+        donors = [...allDonors];
+        renderDonorCards();
+        showToast("🔄 Filter direset, menampilkan semua data");
+      }
+
+      // Set preset range
+      function setPreset(from, to) {
+        document.getElementById("rangeFrom").value = from;
+        document.getElementById("rangeTo").value = Math.min(
+          to,
+          allDonors.length
+        );
+        applyRangeFilter();
+      }
+
+      // Check if row is header
+      function isHeader(row) {
+        if (!row) return false;
+        const headerKeywords = [
+          "nama",
+          "name",
+          "donatur",
+          "phone",
+          "telepon",
+          "whatsapp",
+          "wa",
+          "nominal",
+          "amount",
+          "jumlah",
+          "no",
+        ];
+        return headerKeywords.some(
+          (keyword) =>
+            String(row[0]).toLowerCase().includes(keyword) ||
+            String(row[1]).toLowerCase().includes(keyword) ||
+            String(row[2]).toLowerCase().includes(keyword)
+        );
+      }
+
+      // Format Phone Number
+      function formatPhone(phone) {
+        // Remove non-numeric characters
+        let cleaned = phone.replace(/\D/g, "");
+
+        // Convert 08xxx to 628xxx
+        if (cleaned.startsWith("0")) {
+          cleaned = "62" + cleaned.substring(1);
+        }
+
+        // Add 62 if not present
+        if (!cleaned.startsWith("62")) {
+          cleaned = "62" + cleaned;
+        }
+
+        return cleaned;
+      }
+
+      // Format Currency
+      function formatCurrency(value) {
+        const num = parseFloat(String(value).replace(/[^\d.-]/g, ""));
+        if (isNaN(num)) return "Rp 0";
+        return "Rp " + num.toLocaleString("id-ID");
+      }
+
+      // Render Donor Cards
+      function renderDonorCards() {
+        const container = document.getElementById("donorCards");
+        const countElement = document.getElementById("donorCount");
+        const sendAllBtn = document.getElementById("sendAllBtn");
+
+        countElement.textContent = donors.length;
+
+        if (donors.length === 0) {
+          container.innerHTML = `
+                    <div class="text-center py-12 text-gray-400">
+                        <div class="text-5xl mb-3">📭</div>
+                        <p>Belum ada data donatur</p>
+                        <p class="text-sm">Upload file CSV/XLSX untuk memulai</p>
+                    </div>
+                `;
+          sendAllBtn.classList.add("hidden");
+          return;
+        }
+
+        sendAllBtn.classList.remove("hidden");
+
+        container.innerHTML = donors
+          .map(
+            (donor, index) => `
+                <div class="card-enter donor-card bg-gradient-to-r ${
+                  donor.donationCount > 1
+                    ? "from-orange-50 to-amber-50 border-orange-200"
+                    : "from-green-50 to-emerald-50 border-green-200"
+                } border rounded-xl p-4 hover:shadow-md transition-shadow" data-name="${donor.name.toLowerCase()}" style="animation-delay: ${
+              index * 0.05
+            }s">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-gray-800 flex items-center gap-2 flex-wrap">
+                                <span class="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                                    #${donor.rowNum}
+                                </span>
+                                ${donor.name}
+                                ${
+                                  donor.donationCount > 1
+                                    ? `<span class="text-xs bg-orange-500 text-white px-2 py-0.5 rounded-full">🔄 ${donor.donationCount}x donasi digabung</span>`
+                                    : ""
+                                }
+                            </h3>
+                            <div class="mt-2 space-y-1 text-sm text-gray-600 ml-10">
+                                <p class="flex items-center gap-2">
+                                    <span>📱</span>
+                                    <span>+${donor.phone}</span>
+                                </p>
+                                <p class="flex items-center gap-2">
+                                    <span>💰</span>
+                                    <span class="font-semibold ${
+                                      donor.donationCount > 1
+                                        ? "text-orange-600"
+                                        : "text-green-600"
+                                    }">${donor.amount}</span>
+                                    ${
+                                      donor.donationCount > 1
+                                        ? '<span class="text-xs text-orange-500">(total gabungan)</span>'
+                                        : ""
+                                    }
+                                </p>
+                            </div>
+                        </div>
+                        <button onclick="sendToWhatsApp(${donor.id})" id="btn-${
+              donor.id
+            }" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
+              sentStatus[donor.id] ? "bg-gray-400 hover:bg-gray-400" : ""
+            }">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                            </svg>
+                            ${sentStatus[donor.id] ? "Terkirim" : "Kirim WA"}
+                        </button>
+                    </div>
+                </div>
+            `
+          )
+          .join("");
+      }
+
+      // Filter Donors
+      function filterDonors() {
+        const searchTerm = document
+          .getElementById("searchInput")
+          .value.toLowerCase();
+        const cards = document.querySelectorAll(".donor-card");
+
+        cards.forEach((card) => {
+          const name = card.dataset.name;
+          card.style.display = name.includes(searchTerm) ? "block" : "none";
+        });
+      }
+
+      // Send to WhatsApp
+      function sendToWhatsApp(donorId) {
+        const donor = donors.find((d) => d.id === donorId);
+        if (!donor) return;
+
+        // Get message and replace placeholders
+        let message = messageTemplate.value;
+        message = message.replace(/{nama}/g, donor.name);
+        message = message.replace(/{nominal}/g, donor.amount);
+
+        // Properly encode message for WhatsApp URL (handles emoji correctly)
+        const encodedMessage = encodeURIComponent(message);
+
+        // Use api.whatsapp.com/send which handles Unicode/emoji better
+        const waUrl = `https://api.whatsapp.com/send?phone=${donor.phone}&text=${encodedMessage}`;
+
+        window.open(waUrl, "_blank");
+
+        sentStatus[donorId] = true;
+        const btn = document.getElementById(`btn-${donorId}`);
+        if (btn) {
+          btn.classList.remove("bg-green-500", "hover:bg-green-600");
+          btn.classList.add("bg-gray-400", "hover:bg-gray-400");
+          btn.innerHTML = `
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                    Terkirim
+                `;
+        }
+
+        showToast(`✅ Membuka WhatsApp untuk ${donor.name}`);
+      }
+
+      // Send All
+      function sendAll() {
+        if (donors.length === 0) {
+          showToast("❌ Tidak ada data donatur");
+          return;
+        }
+
+        const confirmSend = confirm(
+          `Anda akan mengirim pesan ke ${donors.length} donatur. Setiap pesan akan dibuka di tab baru. Lanjutkan?`
+        );
+
+        if (confirmSend) {
+          let delay = 0;
+          donors.forEach((donor, index) => {
+            if (!sentStatus[donor.id]) {
+              setTimeout(() => {
+                sendToWhatsApp(donor.id);
+              }, delay);
+              delay += 1000; // 1 second delay between each
+            }
+          });
+
+          showToast(
+            `📤 Membuka ${
+              donors.filter((d) => !sentStatus[d.id]).length
+            } tab WhatsApp...`
+          );
+        }
+      }
+
+      // Insert Emoji
+      function insertEmoji(emoji) {
+        const textarea = messageTemplate;
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const text = textarea.value;
+
+        textarea.value = text.substring(0, start) + emoji + text.substring(end);
+        textarea.selectionStart = textarea.selectionEnd = start + emoji.length;
+        textarea.focus();
+
+        updatePreview();
+      }
+
+      // Update Preview
+      function updatePreview() {
+        const template = messageTemplate.value;
+        const preview = template
+          .replace(
+            /{nama}/g,
+            '<span class="bg-yellow-200 px-1 rounded">Ahmad Donatur</span>'
+          )
+          .replace(
+            /{nominal}/g,
+            '<span class="bg-green-200 px-1 rounded">Rp 500.000</span>'
+          );
+
+        messagePreview.innerHTML = preview;
+      }
+
+      messageTemplate.addEventListener("input", updatePreview);
+
+      // Clear File
+      function clearFile() {
+        allDonors = [];
+        donors = [];
+        sentStatus = {};
+        fileInput.value = "";
+        document.getElementById("fileInfo").classList.add("hidden");
+        document.getElementById("totalDataInfo").textContent = "Total: 0 data";
+        document.getElementById("rangeFrom").value = 1;
+        document.getElementById("rangeTo").value = 50;
+        renderDonorCards();
+        showToast("🗑️ Data donatur dihapus");
+      }
+
+      // Show Toast
+      function showToast(message) {
+        const toast = document.getElementById("toast");
+        const toastMessage = document.getElementById("toastMessage");
+
+        toastMessage.textContent = message;
+        toast.classList.remove("translate-y-20", "opacity-0");
+
+        setTimeout(() => {
+          toast.classList.add("translate-y-20", "opacity-0");
+        }, 3000);
+      }
+    </script>
+  </body>
+</html>
